@@ -89,7 +89,7 @@ export const useChatStore = create((set, get) => ({
                 get().incrementUnread(newMessage.senderId);
                 const onlineUsers = useAuthStore.getState().onlineUsers;
                 if(onlineUsers.includes(newMessage.senderId)){
-                    toast.success("New message from " + newMessage.senderName || "a user");
+                    toast.success("New message from " + newMessage || "a user");
                 }
             }
             set({
