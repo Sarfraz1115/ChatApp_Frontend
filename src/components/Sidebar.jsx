@@ -12,8 +12,11 @@ const Sidebar = () => {
 
     // Function to handle typing indicator
     useEffect(() => {
-
         useChatStore.getState().subscribeToTyping();
+    }, []);
+
+    useEffect(() => {
+        useChatStore.getState().subscribeToMessages();
     }, []);
 
     useEffect(() => {
