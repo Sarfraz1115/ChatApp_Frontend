@@ -21,7 +21,19 @@ const Sidebar = () => {
     }, [getUsers]);
 
     // Filter users based on online status if showOnlineOnly is true
-    const filteredUsers = showOnlineOnly ? users.filter(user => onlineUsers.includes(user._id)) : users;
+    // const filteredUsers = showOnlineOnly ? users.filter(user => onlineUsers.includes(user._id)) : users;
+    let filteredUsers = showOnlineOnly 
+    ? users.filter(user => onlineUsers.includes(user._id))
+    : users.slice();
+
+    // Sort users to show the selected user at the top
+    filteredUsers.sort((a,b) => {
+        const aonline = onlineUsers.includes(a._id);
+        const bonline = onlineUsers.includes(b._id);
+        if(aonline === bonline) return 0;
+
+        return aonline ? -1 : 1;
+    })
 
 
 
