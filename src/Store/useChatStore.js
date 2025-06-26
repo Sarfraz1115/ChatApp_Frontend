@@ -14,6 +14,21 @@ export const useChatStore = create((set, get) => ({
     isUsersLoading: false,
     isMessagesLoading: false,
     typingUsers: [],
+    unreadCounts: {},
+
+    incrementUnread: (userId) => set((state) => ({
+        unreadCounts: {
+            ...state.unreadCounts,
+            [userId]: (state.unreadCounts[userId] || 0) + 1
+        }
+    })),
+
+    clearUnread: (userId) => set((state) => ({
+        unreadCounts: {
+            ...state.unreadCounts,
+            [userId]: 0
+        }
+    })),
 
 
     getUsers: async () => {
@@ -68,13 +83,21 @@ export const useChatStore = create((set, get) => ({
 
         const socket = useAuthStore.getState().socket;
         socket.on("newMessage", (newMessage) => {
-            const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-            if (!isMessageSentFromSelectedUser) return;
+            // const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+            // if (!isMessageSentFromSelectedUser) return;
+            if (!selectedUser || newMessage.senderId !== selectedUser._id) {
+                get().incrementUnread(newMessage.senderId);
+                const onlineUsers = useAuthStore.getState().onlineUsers;
+                if(onlineUsers.includes(newMessage.senderId)){
+                    toast.success("New message from " + newMessage.senderName);
+                }
+            }
             set({
                 messages: [...get().messages, newMessage],
             });
         });
     },
+
 
 
     unsubcribeFromMessages: () => {
@@ -93,22 +116,22 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
-    subscribeToTyping : () => {
+    subscribeToTyping: () => {
         // const {selectedUser} = get();
         // if(!selectedUser) return;
 
         const socket = useAuthStore.getState().socket;
-        if(!socket) return;
-        
-        socket.on("typing", ({from}) => {
+        if (!socket) return;
+
+        socket.on("typing", ({ from }) => {
             console.log("recieved typing form", from);
-            
+
             set((state) => ({
                 typingUsers: [...new Set([...state.typingUsers, from])]
             }));
         });
 
-        socket.on("stopTyping", ({from}) => {
+        socket.on("stopTyping", ({ from }) => {
             console.log("recieved stop typing from", from);
             set((state) => ({
                 typingUsers: state.typingUsers.filter((id) => id !== from)
@@ -117,7 +140,9 @@ export const useChatStore = create((set, get) => ({
     },
 
 
-    setSelectedUser: (selectedUser) => set({ selectedUser }),
-
+    setSelectedUser: (selectedUser) => {
+        set({ selectedUser });
+        get().clearUnread(selectedUser._id);
+    },
 
 }))

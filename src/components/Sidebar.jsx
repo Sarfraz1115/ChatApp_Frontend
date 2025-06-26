@@ -5,7 +5,7 @@ import SidebarSkeleton from './skeletons/SidebarSkeleton';
 import { Users } from 'lucide-react';
 
 const Sidebar = () => {
-    const { getUsers, users, selectedUser, setSelectedUser, isUserLoading } = useChatStore();
+    const { getUsers, users, selectedUser, setSelectedUser, isUserLoading, unreadCounts } = useChatStore();
     const { onlineUsers } = useAuthStore();
     const {typingUsers} = useChatStore();
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
@@ -75,6 +75,18 @@ const Sidebar = () => {
                             {onlineUsers.includes(user._id) && (
                                 <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900" />
                             )}
+
+
+                            {/* Unread Messages  */}
+                            {
+                                unreadCounts[user._id] > 0 && (
+                                    <span className='absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5'>
+                                        {unreadCounts[user._id]}
+                                    </span>
+                                )
+        }
+
+
                             {/* typing indicatore */}
                             {
                                 typingUsers.map(String).includes(String(user._id)) && (
